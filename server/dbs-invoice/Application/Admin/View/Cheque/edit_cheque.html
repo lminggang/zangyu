@@ -1,0 +1,359 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{$meta_title}|OneThink管理平台</title>
+    <link href="__ROOT__/Public/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" type="text/css" href="__CSS__/base.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/common.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/module.css">
+    <link rel="stylesheet" type="text/css" href="__CSS__/style.css" media="all">
+  <link rel="stylesheet" type="text/css" href="__CSS__/{$Think.config.COLOR_STYLE}.css" media="all">
+     <!--[if lt IE 9]>
+    <script type="text/javascript" src="__STATIC__/jquery-1.10.2.min.js"></script>
+    <![endif]--><!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="__STATIC__/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="__JS__/jquery.mousewheel.js"></script>
+    <style type="text/css">
+      body{
+        padding: 0px;
+      }
+      .cheque_title{
+        text-align: center;
+        font-size: 2rem;
+      }
+      .department{
+        width: 150px;
+        display: inline-block;
+      }
+
+      .cheque_NO{
+        text-align: right;
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: inline-block;
+        right: 30px;
+        color: #333;
+        position: absolute;
+      }
+      .cheque_NO span{
+        color: red;
+        font-weight: bold;
+      }
+      .cheque_amount_zh{
+        width: 400px;
+        font-size: 1.5rem;
+      }
+
+      #search_result {
+          display: none;
+          width: 300px;
+          left: 81px;
+          top: 0px;
+          z-index: 1;
+          overflow: hidden;
+          background: #dcf6f8;
+          border: #c5dadb 1px solid;
+          border-top: none;
+          position: absolute;
+      }
+      .right {
+          float: left;
+          border: 1px solid #000000;
+          padding: 7px 20px;
+          width: 20px;
+          height: 20px;
+          border-left: none;
+      }
+       
+      .line {
+          font-size: 1.5rem;
+          color: #000;
+          background: #ffffff;
+          width: 302px;
+          padding: 2px;
+          line-height: 25px;
+      }
+       
+      .hover {
+          background: #007ab8;
+          color: #fff;
+      }
+    </style>
+    <script type="text/javascript">
+        function DX(n){
+            if (!/^(0|[1-9]\d*)(\.\d+)?$/.test(n))
+            return "";
+            var unit = "仟佰拾亿仟佰拾万仟佰拾元角分", str = "";
+            n += "00";
+            var p = n.indexOf('.');
+            if (p >= 0)
+            n = n.substring(0, p) + n.substr(p+1, 2);
+            unit = unit.substr(unit.length - n.length);
+            for (var i=0; i < n.length; i++)
+            str += '零壹贰叁肆伍陆柒捌玖'.charAt(n.charAt(i)) + unit.charAt(i);
+            return str.replace(/零(仟|佰|拾|角)/g, "零").replace(/(零)+/g, "零").replace(/零(万|亿|元)/g, "$1").replace(/(亿)万|壹(拾)/g, "$1$2").replace(/^元零?|零分/g,
+
+            "").replace(/元$/g, "元整");
+        }
+
+        function clearNoNum(obj){  
+            obj.value = obj.value.replace(/[^\d.]/g,"");  //清除“数字”和“.”以外的字符   
+            obj.value = obj.value.replace(/\.{2,}/g,"."); //只保留第一个. 清除多余的   
+            obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");  
+            obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数   
+            if(obj.value.indexOf(".")< 0 && obj.value !=""){
+               obj.value= parseFloat(obj.value);  
+
+
+            }  
+        }
+    </script>
+</head>
+<body>
+    <form id="form1">
+    <table class="table table-bordered">
+        <tr>
+            <th class="cheque_title" colspan="2">
+                支票申领单
+                <div class="cheque_NO">
+                    <span>No.</span>&nbsp;{$info.cheque_NO}
+                </div>
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <label>申领日期: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 150px; display: inline-block;" id="cheque_apply_date" name="cheque_apply_date" class="text input-2x" value="{$info.cheque_apply_date}" />
+            </td>
+            <td>
+                <label>支票号码: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 200px; display: inline-block;" id="cheque_num" name="cheque_num" class="text input-2x" value="{$info.cheque_num}" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label><span style='color:red;'>*&nbsp;</span>申领部门: &nbsp;</label>
+                <select name="department" class="form-control" style="width: 150px; display: inline-block;">
+                    <option value="">请选择部门</option>
+                    <foreach name='department_list' item='v' key='k'>
+                        <option value="{$k}" <if condition="$info.cheque_apply_department eq $k ">selected</if>>{$v}</option>
+                    </foreach>
+                </select>
+            </td>
+            <td>
+                <label>签发日期: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 150px; display: inline-block;" id="cheque_verify_date" name="cheque_verify_date" class="text input-2x" value="{$info.cheque_verify_date}" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>接受单位: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 300px; display: inline-block;" id="cheque_company_name" name="cheque_company_name" class="text input-2x" value="{$info.cheque_company_name}" />
+                <div style="position: relative;width:0;height:0;">
+                    <div id="search_result" class=" "></div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>银行名称: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 300px; display: inline-block;" id="cheque_bank_name" name="cheque_bank_name" class="text input-2x" value="{$info.cheque_bank_name}" />
+            </td>
+            <td>
+                <label>联系人: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 120px; display: inline-block;" id="cheque_contact_name" name="cheque_contact_name" class="text input-2x" value="{$info.cheque_contact_name}" />&emsp;
+                <label>电话: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 220px; display: inline-block;" id="cheque_contact_phone_num" name="cheque_contact_phone_num" class="text input-2x" value="{$info.cheque_contact_phone_num}" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label><span style='color:red;'>*&nbsp;</span>项目名称: &nbsp;</label>
+                <select name="project_id" class="form-control" style="width: 300px; display: inline-block;">
+                    <option value="">请选择项目</option>
+                    <foreach name='project_list' item='v' key='k'>
+                        <option value="{$v['id']}" <if condition="$info.fk_project_id eq $v['id'] ">selected</if> data-project_code="{$v['project_code']}">{$v['project_name']}</option>
+                    </foreach>
+                </select>
+            </td>
+            <td>
+                <label>项目编号: &nbsp;</label>
+                <input type="text" class="form-control project_code" autocomplete="off" style="width: 350px; display: inline-block;" readonly="" class="text input-2x" value="{$info.project_code}"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>支票用途: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 400px; display: inline-block;" id="cheque_desc" name="cheque_desc" class="text input-2x" value="{$info.cheque_desc}"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>计划金额: &nbsp;</label>
+                <div class="cheque_amount_zh" style="display: inline-block;">{$info.cheque_amount_zh}</div>
+                <label><span style='color:red;'>*&nbsp;</span>小写: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 200px; display: inline-block;"  onkeyup="clearNoNum(this)" id="cheque_amount" name="cheque_amount" class="text input-2x" value="{$info.cheque_amount}" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>备注: &nbsp;</label>
+                <input type="text" class="form-control" autocomplete="off" style="width: 400px; display: inline-block;" id="cheque_remark" name="cheque_remark" class="text input-2x" value="{$info.cheque_remark}"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <input type="button" class="btn btn-success" name="create_cheque" value="提 交">
+            </td>
+        </tr>
+    </table>
+  <link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+
+  <link href="__STATIC__/datetimepicker/css/datetimepicker.css" rel="stylesheet" type="text/css">
+  <php>if(C('COLOR_STYLE')=='blue_color') echo '<link href="__STATIC__/datetimepicker/css/datetimepicker_blue.css" rel="stylesheet" type="text/css">';</php>
+  <link href="__STATIC__/datetimepicker/css/dropdown.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="__STATIC__/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+  <script type="text/javascript" src="__STATIC__/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+
+  <script type="text/javascript">
+  $(function(){
+    var currentLine = 0; // 定义上下键移动需要的参数
+ 
+    $("#cheque_company_name").keyup(function(event) {
+        if (event.keyCode == 13) {//enter键盘事件
+            enterFunc();
+            return;
+        }
+     
+        if (event.keyCode == 38) {//方向（上）键
+            currentLine--;
+            changeItem();
+            return;
+        }
+     
+        if (event.keyCode == 40) {//方向（下）键
+            currentLine++;
+            changeItem();
+            return;
+        }
+
+        if ($(this).val().replace(/\s+/g, "") == '') { //非空验证
+            cleanHtml();
+            return;
+        }
+     
+        $.ajax({ //ajax查询
+            url : "{:U('Cheque/search_history_company')}",
+            data : {'company_name': $(this).val()},
+            type : "post",
+            dataType: 'json',
+            success : function(res) {
+                var data = res.data;
+
+
+                if (data.length <= 0) //若没有结果，隐藏
+
+                    return;
+     
+                var htm; //遍历结果，拼接html
+                htm = "<table id='ret'>";
+                for (var i = 0; i < data.length; i++) {
+                    htm += "<tr id='sel'><td class='line' data-bank_name='" + data[i]['cheque_bank_name'] + "' data-contact_name='" + data[i]['cheque_contact_name'] + "' data-contact_phone_num='" + data[i]['cheque_contact_phone_num'] + "'>" + data[i]['cheque_company_name']
+                            + "</td></tr>";
+                }
+                htm += "</table>";
+                $('#search_result').show(); //显示并赋值
+                $('#search_result').html(htm);
+     
+                $('.line:first').addClass('hover');// 表格第一行默认高亮
+     
+                $('.line').hover(function() { // 鼠标匹配到的元素高亮
+                    $('.line').removeClass('hover');
+                    $(this).addClass('hover');
+                }, function() {
+                    $(this).removeClass('hover');
+                });
+     
+                $('.line').click(function() { //选中行点击事件
+                    $('#cheque_company_name').val($(this).text());
+
+                    $('#cheque_bank_name').val($(this).data('bank_name'));
+                    $('#cheque_contact_name').val($(this).data('contact_name'));
+                    $('#cheque_contact_phone_num').val($(this).data('contact_phone_num'));
+                    cleanHtml(); //清空操作
+                })
+     
+            }
+        });
+    });
+    //enter键盘事件
+    function enterFunc() {
+        if ($(".hover").html() == null) //判断高亮显示的name是否为空
+            return;
+        $("#cheque_company_name").val($(".hover").html()); //赋值给输入框
+        cleanHtml(); //清空操作
+    }
+    
+
+    $('#cheque_amount').bind('keyup', function(){
+        $(".cheque_amount_zh").html(DX($(this).val()))
+    })
+
+    $("input[name='create_cheque']").bind('click', function(){
+        var load = layer.load(2);
+        $.ajax({
+            url: window.location.href,
+            type: "POST",
+            dataType: "json",
+            data: $("#form1").serialize(),
+            success: function(res){
+                layer.close(load);
+
+                if(res.errNo == "0"){
+                    parent.location.href = parent.location.href;
+                }else{
+                    layer.alert(res.errMsg);
+                }
+            }
+        })
+    })
+    // 方向盘调用的事件
+    function changeItem() {
+        if (currentLine < 0) { // 此时，第一行高亮，按下了方向（上）键
+            currentLine = $("#ret .line").length - 1;
+        } else if (currentLine == $("#ret .line").length) { //此时，最后一行高亮，按下了方向（下）键
+            currentLine = 0;
+        }
+        $('.line').removeClass('hover'); // 清除高亮
+        $(".line:eq(" + currentLine + ")").addClass('hover'); //添加高亮
+    }
+     
+    function cleanHtml() {
+        currentLine = 0; //重新赋值
+        $('#search_result').html(""); //清空内容
+        $('#search_result').hide();//隐藏div
+    }
+    $('#cheque_apply_date').datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:"zh-CN",
+        minView:2,
+        autoclose:true
+    });
+
+    
+    $('#cheque_verify_date').datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:"zh-CN",
+        minView:2,
+        autoclose:true
+    });
+
+    $("select[name='project_id']").bind('change', function(){
+        $(".project_code").val($(this).find('option:selected').data('project_code'))
+    })
+  })
+  </script>
+</body>
+</html>

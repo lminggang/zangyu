@@ -1,0 +1,150 @@
+<extend name="Public/base"/>
+
+<!-- 子导航 -->
+<block name="sidebar">
+    <include file="sidemenu" />
+</block>
+
+
+<block name="body">
+	<div class="container">
+		<h2>发票金额汇总</h2>
+		<form class="search-form" action="/Admin/Invoice/invoiceStatPie" method="get">
+			<label style="margin-left: 10px;">开票日期&nbsp;</label>
+			<input type="text" class="form-control" id="start_date" name="start_date" class="text input-2x" value="{$start_date}" placeholder="起始时间" /> -                		
+        	<input type="text" class="form-control" id="end_date" name="end_date" class="text input-2x" value="{$end_date}" placeholder="结束时间" />
+
+        	<input type="submit" class="btn btn-primary" id="search" value="查询">
+		</form>
+		<div class="pie_chart" id="pie_chart" style="width: 700px;height:600px;">
+			
+		</div>
+
+		<div style="width: 300px; margin-left:85px; display: inline-block;">
+			<table class="table">
+				<thead>
+					<tr>
+						<th colspan="2">明细</th>
+					</tr>
+				</thead>
+				<tbody>
+					<volist name="stat.series.data" id='r'>
+						<tr>
+							<td>{$r['name']}</td>
+							<td style="text-align: right;">{$r['amount']} 元</td>
+						</tr>
+					</volist>
+					<tr>
+						<tr>
+							<td colspan="2" style="text-align: right;">合计：{$stat['total_amount']} 元</td>
+						</tr>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+</block>
+<block name="script">
+<style type="text/css">
+	.search-form .search-input{
+		float: none;
+		margin-left: 10px;
+	}
+	.sleft *{
+		font-size: 16px;
+	}
+
+	.search-form {
+		padding-bottom: 10px;
+		margin-bottom: 10px;
+		border-bottom: 4px #ccc solid;
+	}
+
+	.search-form .form-control{
+		display: inline-block;
+		width: 15%;
+	}
+
+	#search,#reset{
+		margin-left: 10px;
+		margin-top: -5px;
+	}
+
+	.pie_chart{
+		display: inline-block;
+		padding: 10px;
+	}
+</style>
+<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<link href="__STATIC__/datetimepicker/css/datetimepicker.css" rel="stylesheet" type="text/css">
+<php>if(C('COLOR_STYLE')=='blue_color') echo '<link href="__STATIC__/datetimepicker/css/datetimepicker_blue.css" rel="stylesheet" type="text/css">';</php>
+
+<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+<script type="text/javascript" src="/Public/Admin/js/echarts.min.js"></script>
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script type="text/javascript">
+$(function(){
+
+	var myChart = echarts.init(document.getElementById('pie_chart'));
+
+	var stat = transArr({$stat|json_encode=true});
+	var stat = stat;
+
+	var option = {
+	    title : {
+	        text: '{$stat["title"]}',
+	        subtext: '{$stat["subtext"]}',
+	        x:'center'
+	    },
+	    tooltip : {
+	        trigger: 'item',
+	        formatter: "{b} <br/>金额 : {c} 元 ({d}%)"
+	    },
+	    legend: stat.legend,
+	    series : [
+	        {
+	            name: '发票金额',
+	            type: 'pie',
+	            radius : '55%',
+	            center: ['50%', '60%'],
+	            data:stat.series.data,
+	            itemStyle: {
+	                emphasis: {
+	                    shadowBlur: 10,
+	                    shadowOffsetX: 0,
+	                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+	                }
+	            }
+	        }
+	    ]
+	};
+
+	myChart.setOption(option);
+
+    $('#start_date').datetimepicker({
+        format: 'yyyy-mm-dd',
+        language:"zh-CN",
+	    minView:2,
+	    autoclose:true
+    });
+
+    $('#end_date').datetimepicker({
+       format: 'yyyy-mm-dd',
+        language:"zh-CN",
+        minView:2,
+        autoclose:true,
+        pickerPosition:'bottom-left'
+    })
+
+    function transArr(obj) {
+        var tem=[];
+        $.each(obj, function(i) {
+            tem[i]=obj[i];
+        });
+        return tem;
+    }
+})
+</script>
+</block>

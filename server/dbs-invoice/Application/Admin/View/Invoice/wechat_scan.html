@@ -1,0 +1,229 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>发票扫码</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="/Public/webuploader/webuploader.css" rel="stylesheet">
+
+    <script type="text/javascript" src="__STATIC__/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+    <script type="text/javascript" src="/Public/webuploader/webuploader.js"></script>
+
+    <style type="text/css">
+        #qrcode img{
+            width: 100%;
+            height: 100%;
+            padding: 2px;
+            border: #d9d9d9 solid 1px;
+        }
+        .webuploader-pick{
+            display: block;
+
+        }
+        .invoice_list{
+            margin-top: 20px;
+        }
+
+        .table tbody tr .contrl{
+            text-align: right;
+        }
+
+        .set_token{
+            margin-top: 20px;
+        }
+
+        .clear_cache{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <input type="text" class="form-control set_token" name="token">
+    <input type="button" class="btn btn-success btn-block clear_cache"  value="清空列表">
+    <table class="table invoice_list">
+        <thead>
+            <tr>
+                <th colspan="2">已扫列表</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    $(function(){
+        // 初始化Web Uploader
+        var uploader = WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: true,
+            // swf文件路径
+            swf: '/Public/webuploader/Uploader.swf',
+            // 文件接收服务端。
+            server: '{:U("Index/scanQRcode",array("token"=> $token))}',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+            // 只允许选择图片文件。
+            accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            }
+        });
+
+        uploader.on( 'uploadSuccess', function( file, res) {
+            if(res.errNo == "0"){
+                layer.msg('识别成功', {icon: 1});
+            }else{
+                layer.msg(res.errMsg, {icon: 2});
+            }
+        });
+
+        setInterval(function(){
+            var token = window.localStorage.getItem('invoice_token');
+            if(token == null || token == ''){
+                return 0;
+            }
+            $.ajax({
+                url: "{:U('Home/Index/getScanInvoiceList')}&token=" + token,
+                type:"GET",
+                dataType: "json",
+                success: function(res){
+
+                    var html = '';
+                    for(k in res.data){
+
+                        var data = res.data[k];
+
+                        html += "<tr>";
+                        html += "<td>" + data['title'] + "</td>";
+                        html += "<td class='contrl'><a class='set_invoice btn btn-default btn-sm' data-invoice='" + data['value'] + "'>使用</a></td>";
+                        html += "</tr>";
+                    }
+
+                    $(".invoice_list tbody").html(html);
+                }
+            })
+        },500);
+
+        $('.clear_cache').bind('click', function(){
+            var token = window.localStorage.getItem('invoice_token');
+            if(token == null || token == ''){
+                return 0;
+            }
+            $.ajax({
+                url: "{:U('Home/Index/cleartScanInvoiceList')}&token=" + token,
+                type:"GET",
+                dataType: "json",
+                success: function(res){
+                    window.location.href = window.location.href;
+                }
+            })
+        })
+
+        $(document).on("click", '.set_invoice', function(){
+            var invoice = $(this).data("invoice").split(",");
+            console.log(invoice);
+
+	    	var release_date = invoice[5].substring(0,4) + "-" + invoice[5].substring(4,6) + "-" + invoice[5].substring(6,8);
+
+	    	$("#invoice_code", window.parent.document).val(invoice[2]);
+	    	$("#invoice_num", window.parent.document).val(invoice[3]);
+	    	$("#invoice_amount", window.parent.document).val(invoice[4]);
+	    	$("#release_date", window.parent.document).val(release_date);
+	    	$("#verify_code", window.parent.document).val(invoice[6]);
+    	    $("#no_tax_amount", window.parent.document).val(invoice[4]);
+            const invoiceType = getInvoiceType(invoice[2])
+            $("#invoice_type_name", window.parent.document).val(invoiceType.fplxName);
+            $("#invoice_type_code", window.parent.document).val(invoiceType.fplx);
+
+        })
+
+        $('.set_token').bind('keydown', function(event){
+            if(event.keyCode == 13){
+                window.localStorage.setItem('invoice_token', $(this).val());
+            }
+        })
+    })
+
+    var token = window.localStorage.getItem('invoice_token');
+    console.log(token)
+    if(token != null && token != ''){
+        $('.set_token').val(token);
+    }
+
+
+function getInvoiceType(fpdm) {
+  if (fpdm.length === 12) {
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '11') {
+      return {
+        fplx: '10',
+        fplxName: '增值税电子普通发票',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '12') {
+      return {
+        fplx: '14',
+        fplxName: '增值税电子普通发票(通行费)',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && (fpdm.substring(10, 12) === '04' || fpdm.substring(10, 12) === '05')) {
+      return {
+        fplx: '04',
+        fplxName: '增值税普通发票',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && (fpdm.substring(10, 12) === '06' || fpdm.substring(10, 12) === '07')) {
+      return {
+        fplx: '11',
+        fplxName: '增值税普通发票(卷票)',
+      };
+    }
+
+
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '17') {
+      return {
+        fplx: '15',
+        fplxName: '二手车销售统一发票',
+      };
+    }
+
+    if (fpdm.charAt(0) !== '0' && fpdm.substring(7, 8) === '2') {
+      return {
+        fplx: '03',
+        fplxName: '机动车销售统一发票',
+      };
+    }
+  }
+  if (fpdm.length === 10) {
+    const b = fpdm.substring(7, 8);
+    if (b === '1' || b === '5') {
+      return {
+        fplx: '01',
+        fplxName: '增值税专用发票',
+      };
+    }
+    if (b === '6' || b === '3') {
+      return {
+        fplx: '04',
+        fplxName: '增值税普通发票',
+      };
+    }
+    if (b === '7' || b === '2') {
+      return {
+        fplx: '02',
+        fplxName: '货物运输业增值税专用发票',
+      };
+    }
+  }
+  return {
+        fplx: '',
+        fplxName: '',
+      };
+}
+</script>
+</body>
+</html>

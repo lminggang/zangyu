@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{$meta_title}|OneThink管理平台</title>
+    <link href="__ROOT__/Public/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" type="text/css" href="__CSS__/base.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/common.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/module.css">
+    <link rel="stylesheet" type="text/css" href="__CSS__/style.css" media="all">
+  <link rel="stylesheet" type="text/css" href="__CSS__/{$Think.config.COLOR_STYLE}.css" media="all">
+
+    
+     <!--[if lt IE 9]>
+    <script type="text/javascript" src="__STATIC__/jquery-1.10.2.min.js"></script>
+    <![endif]--><!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="__STATIC__/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="__JS__/jquery.mousewheel.js"></script>
+    <style type="text/css">
+    body{
+        padding: 20px;
+    }
+    .search-form .search-input{
+        float: none;
+        margin-left: 10px;
+    }
+    .sleft *{
+        font-size: 16px;
+    }
+
+    .cf{
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 4px #ccc solid;
+    }
+
+    .search-form .form-control{
+        display: inline-block;
+        width: 12%;
+    }
+
+    #search,#reset{
+        margin-left: 10px;
+    }
+    </style>
+    <script type="text/javascript">
+        function DX(n){
+            if (!/^(0|[1-9]\d*)(\.\d+)?$/.test(n))
+            return "";
+            var unit = "仟佰拾亿仟佰拾万仟佰拾元角分", str = "";
+            n += "00";
+            var p = n.indexOf('.');
+            if (p >= 0)
+            n = n.substring(0, p) + n.substr(p+1, 2);
+            unit = unit.substr(unit.length - n.length);
+            for (var i=0; i < n.length; i++)
+            str += '零壹贰叁肆伍陆柒捌玖'.charAt(n.charAt(i)) + unit.charAt(i);
+            return str.replace(/零(仟|佰|拾|角)/g, "零").replace(/(零)+/g, "零").replace(/零(万|亿|元)/g, "$1").replace(/(亿)万|壹(拾)/g, "$1$2").replace(/^元零?|零分/g,
+
+            "").replace(/元$/g, "元整");
+        }
+
+        function clearNoNum(obj){  
+            obj.value = obj.value.replace(/[^\d.]/g,"");  //清除“数字”和“.”以外的字符   
+            obj.value = obj.value.replace(/\.{2,}/g,"."); //只保留第一个. 清除多余的   
+            obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");  
+            obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数   
+            if(obj.value.indexOf(".")< 0 && obj.value !=""){
+               obj.value= parseFloat(obj.value);  
+
+
+            }  
+        }
+    </script>
+</head>
+<body>
+<form id='form1'>
+    <div class="search-form">
+        <label style="margin-left: 10px;">员工姓名&nbsp;</label>
+                <input type="text" class="form-control" id="project_name" autocomplete="off" name="staff_name" value="{:I('staff_name')}" placeholder="请输入员工名称" />
+                <label style="margin-left: 10px;">行程时间&nbsp;</label>
+                <input type="text" class="form-control" id="start_time" autocomplete="off" name="start_time" class="text input-2x" value="{:I('start_time')}" placeholder="开始时间" /> - 
+                <input type="text" class="form-control" id="end_time" autocomplete="off" name="end_time" class="text input-2x" value="{:I('end_time')}" placeholder="结束时间" />
+        <a class="btn btn-primary" href="javascript:;" id="search" url="{:U('Invoice/select_taxi_reimburse')}">搜索</a>
+        <a class="btn btn-default" href="{:U('Invoice/select_taxi_reimburse')}" id="reset">重置</a>
+    </div>
+</form>
+<form id="form1">
+    <!-- 数据表格 -->
+    <div class="" style="margin-top: 20px;">
+        <table class="table">
+            <thead>
+                <tr>
+                <th class="">员工姓名</th>
+                <th class="">员工部门</th>
+                <th class="">开始时间</th>
+                <th class="">终止时间</th>
+                <th class="">费用单类型</th>
+                <th class="">金额(元)</th>
+                <th class="">选择</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="success">
+                    <td colspan="7" style="font-weight: bold;">已选列表&nbsp;</td>
+                </tr>
+                <notempty name="info">
+                <tr>
+                    <td>[{$info.staff_NO}]&emsp;{$info.staff_name} </td>
+                    <td>{$info.staff_department}</td>
+                    <td>{$info.travel_start_date}</td>
+                    <td>{$info.travel_end_date}</td>
+                    <td>
+                        <if condition="$info.taxi_type eq 1"> <span class="label label-info">出租车</span>
+                        <elseif condition="$info.taxi_type eq 2"/><span class="label label-warning">滴滴</span>
+                        <else /> <span class="label label-default">未知</span>
+                        </if>
+                    </td>
+                    <td><a class="reload_amount" style="color: #5cb85c;">{$info.total_amount}</a></td>
+                    <td>
+                        <div class="switch">
+                            <input class="check_reimburse" id="select_reimburse" name="radio1"  checked="checked" data-radio-all-off="true" id="check_reimburse_{$info.id}" type="radio" data-reimburse_id='{$info.id}' data-reimburse_amount='{$info.total_amount}' />
+                        </div>
+                    </td>
+                </tr>
+                </notempty>
+                <tr class="info">
+                    <td colspan="7" style="font-weight: bold;">未选列表&nbsp;</td>
+                </tr>
+                <volist name="list" id="vo">
+                <tr>
+                    <td>[{$vo.staff_NO}]&emsp;{$vo.staff_name} </td>
+                    <td>{$vo.staff_department}</td>
+                    <td>{$vo.travel_start_date}</td>
+                    <td>{$vo.travel_end_date}</td>
+                    <td>
+                        <if condition="$vo.taxi_type eq 1"> <span class="label label-info">出租车</span>
+                        <elseif condition="$vo.taxi_type eq 2"/><span class="label label-warning">滴滴</span>
+                        <else /> <span class="label label-default">未知</span>
+                        </if>
+                    </td>
+                    <td><a class="reload_amount" style="color: #5cb85c;">{$vo.total_amount}</a></td>
+                    <td>
+                        <if condition="($vo.bind_status eq 'OTHER')">  -
+                        <else/>
+                        <div class="switch">
+                            <input class="check_reimburse" data-radio-all-off="true" name="radio1" id="check_reimburse_{$vo.id}" type="radio" data-reimburse_id='{$vo.id}' data-reimburse_amount='{$vo.total_amount}' />
+                        </div>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table> 
+    </div>
+
+    <!-- 分页 -->
+    <div class="page1">
+        {$_page}
+    </div>
+</form>
+    <link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+
+    <link href="__STATIC__/datetimepicker/css/datetimepicker.css" rel="stylesheet" type="text/css">
+    <php>if(C('COLOR_STYLE')=='blue_color') echo '<link href="__STATIC__/datetimepicker/css/datetimepicker_blue.css" rel="stylesheet" type="text/css">';</php>
+    <link href="__STATIC__/datetimepicker/css/dropdown.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="__STATIC__/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="__STATIC__/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+    <link rel="stylesheet" type="text/css" href="/Public/switch/css/bootstrap2/bootstrap-switch.css" media="all">
+    <script type="text/javascript" src="/Public/switch/js/bootstrap-switch.js"></script>
+
+
+  <script type="text/javascript">
+  $(function(){
+
+    $('.check_reimburse').bootstrapSwitch({
+        'onText':'选择',
+        'offText': '取消'
+    });
+
+
+    $('.check_reimburse').bootstrapSwitch("onSwitchChange",function(event,state){
+
+
+        var reimburse_id = 0;
+        var reimburse_amount = '';
+
+        if(state){
+            reimburse_id = $(this).data('reimburse_id');
+            reimburse_amount = $(this).data('reimburse_amount');   
+        }
+
+        $("input[name='reimburse_id']", parent.document).val(reimburse_id)
+        $("input[name='invoice_amount']", parent.document).val(reimburse_amount)
+
+    }) 
+
+    $("#search").click(function(){
+      var url = $(this).attr('url')
+      var query  = $('#form1').serialize();
+      query = query.replace(/(&|^)(\w*?\d*?\-*?_*?)*?=?((?=&)|(?=$))/g,'');
+      query = query.replace(/^&/g,'');
+
+      if( url.indexOf('?')>0 ){
+        url += "&reimburse_id={:I('reimburse_id')}&" + query;
+      }else{
+        url += "?reimburse_id={:I('reimburse_id')}&" + query;
+      }
+      window.location.href = url;
+    });
+
+
+    $("#select_reimburse").bootstrapSwitch('state', true)
+
+    $('#start_time').datetimepicker({
+      format: 'yyyy-mm-dd',
+      language:"zh-CN",
+        minView:2,
+        autoclose:true
+    });
+      $('#end_time').datetimepicker({
+          format: 'yyyy-mm-dd',
+          language:"zh-CN",
+        minView:2,
+        autoclose:true
+      });
+
+  })
+  </script>
+</body>
+</html>

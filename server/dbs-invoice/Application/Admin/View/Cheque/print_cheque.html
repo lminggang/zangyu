@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>支票申领单</title>
+	
+	</script>
+	<style type="text/css">
+		html{
+			margin: 0px;
+			padding: 0px;
+			font-family:Arial;
+		}
+		.row{
+			height: 1000px;
+			padding-top: 30px;
+		}
+		.print_tab{
+
+			width: 100%;
+			border-right: #333 1px solid;
+			border-bottom: #333 1px solid;
+		}
+		.ticket_title{
+			font-size: 28px;
+			font-weight: bold;
+			line-height: 30px;
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		.print_tab td{
+			border-top: #333 1px solid;
+			border-left: #333 1px solid;
+			font-size: 14px;
+			line-height: 30px;
+			padding-left: 10px;
+		}
+		.cheque_amount_zh{
+	        width: 350px;
+	        /*font-size: 1.5rem;*/
+	    }
+		.ticket_footer{
+			width: 100%;
+			line-height: 30px;
+		}
+		.row-line{
+			margin-top: 25px;
+			margin-bottom: 50px;
+			border-bottom: #333 1px dashed;
+			display: block;
+		}
+		.company_logo{
+			position: absolute;
+			height: 50px;
+			margin-top: -40px;
+		}
+		.cheque_NO{
+	        text-align: right;
+	        font-size: 1.5rem;
+	        font-weight: bold;
+	        display: inline-block;
+	        right: 10px;
+	        color: #333;
+	        position: absolute;
+	        margin-top: -50px;
+      }
+      .cheque_NO span{
+        	color: red;
+        	font-weight: bold;
+      }
+	</style>
+	<script src="/Public/static/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+	<script type="text/javascript">
+		$(function(){
+
+		})
+	</script>
+</head>
+<body>
+<div class="row row-1">
+	<img class="company_logo" src="/Public/Admin/images/logo.png" />
+	<div class="ticket_title">支票申领单</div>
+	<div class="cheque_NO">
+        <span>No.</span>&nbsp;{$info.cheque_NO}
+    </div>
+	<table class="table table-bordered print_tab" id='print_tab' border="0" cellspacing="0" >
+        <tr>
+            <td>
+                <label>申领日期: &nbsp;</label>
+                {$info.cheque_apply_date}
+            </td>
+            <td>
+                <label>支票号码: &nbsp;</label>
+                {$info.cheque_num}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>申领部门: &nbsp;</label>
+                {$info.department_name}
+            </td>
+            <td>
+                <label>签发日期: &nbsp;</label>
+                {$info.cheque_verify_date}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>接受支票单位: &nbsp;</label>
+                {$info.cheque_company_name}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>银行名称: &nbsp;</label>
+                {$info.cheque_bank_name}
+            </td>
+            <td>
+                <label>联系人: &nbsp;</label>
+                {$info.cheque_contact_name}&emsp;
+                <label>电话: &nbsp;</label>
+                {$info.cheque_contact_phone_num}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>项目名称: &nbsp;</label>
+                {$info.project_name}
+            </td>
+            <td>
+                <label>项目编号: &nbsp;</label>
+                {$info.project_code}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>支票用途: &nbsp;</label>
+                {$info.cheque_desc}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>计划金额: &nbsp;</label>
+                <div class="cheque_amount_zh" style="display: inline-block;">{$info.cheque_amount_zh}</div>
+                <label>&yen;&nbsp;</label>
+                {$info.cheque_amount}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>备注: &nbsp;</label>
+                {$info.cheque_remark}
+            </td>
+        </tr>
+    </table>
+	<table class="ticket_footer" border="0" cellspacing="0">
+		<col width="120px;">
+		<col width="130px;">
+		<col width="130px;">
+		<col width="130px;">
+
+		<tr>
+			<td>审批人:</td>
+			<td>财务经理:</td>
+			<td>部门主管:</td>
+			<td>财务审核:</td>
+			<td>申领人:</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+	<i class="row-line">&nbsp;</i>
+</script>
+</body>
+</html>

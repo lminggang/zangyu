@@ -1,0 +1,353 @@
+<extend name="Public/base"/>
+
+<!-- 子导航 -->
+<block name="sidebar">
+    <include file="sidemenu" />
+</block>
+
+
+<block name="body">
+	<div class="container">
+		<h2>添加发票</h2>
+		<form id="form1">
+			<div class="panel panel-info">
+				<div class="panel-heading">自动录入</div>
+				<div class="panel-body">
+					<div class="form-group">
+				        <label for="test">二维码信息</label>
+				        <input type="text" class="form-control" id="invoice_qrcode">
+				    </div>
+				    <input type="button" class="btn btn-success" name="qrcode_btn" value="识别">
+				    <!-- <input type="button" class="btn btn-info" name="mobile_scan" value="手机识别"> -->
+				    <input type="button" class="btn btn" name="wechat_scan" value="微信识别">
+				</div>
+			</div>
+
+			<div class="panel panel-primary">
+				<div class="panel-heading">发票头信息</div>
+				<div class="panel-body">
+					<div class="form-horizontal">
+						<div class="form-group">
+							<label for="invoice_code" class="col-sm-1 control-label">发票代码</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="invoice_code" name="invoice_code" onchange="editInvoiceType()">
+							</div>
+							<label for="invoice_type_name" class="col-sm-1 control-label">发票类型</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="invoice_type_name" name="invoice_type_name" >
+								<input type="text" class="form-control" style="display: none;" id="invoice_type_code" name="invoice_type_code" >
+							</div>
+							<label for="invoice_num" class="col-sm-1 control-label">发票号码</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="invoice_num" name="invoice_num" >
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label for="release_date" class="col-sm-1 control-label">开票日期</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" maxlength="10" id="release_date" name="release_date" >
+							</div>
+							<label for="verify_code" class="col-sm-1 control-label">校验码</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="verify_code" name="verify_code" >
+							</div>
+							<label for="verify_code" class="col-sm-1 control-label">税前金额</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="no_tax_amount" name="no_tax_amount" >
+							</div>
+						</div>
+					</div>
+					<input type="button" class="btn btn-warning btn-block" name="invoice_review" value="发票核验">
+				</div>
+			</div>
+
+			<div class="panel panel-success">
+				<div class="panel-heading">发票信息</div>
+				<div class="panel-body">
+					<div class="form-horizontal">
+						<div class="form-group">
+							<label for="category_id" class="col-sm-1 control-label">发票分类</label>
+							<div class="col-sm-4">
+								<select class="form-control" name='category_id' id='category_id'>
+									<option value="">请选择分类</option>
+									<volist name='category_list' id='r'>
+										<option value="{$r['id']}">{$r['category_name']}</option>
+									</volist>
+								</select>
+							</div>
+							<label for="product_name" class="col-sm-1 control-label">商品名称</label>
+							<div class="col-sm-4">								
+								<input type="text" class="form-control" id="product_name" name="product_name">
+							</div>
+						</div>
+						
+						<!-- <div class="form-group">
+							<label for="invoice_amount" class="col-sm-4 control-label" style="text-align: left;padding-left:23px;">
+								发票金额 <span class="label label-warning">默认添加不含税</span>
+								<a href="{:U('Invoice/select_taxi_reimburse')}" id="select_taxi_reimburse" class="btn btn-link">交通费用单</a>
+								<input name='reimburse_id' type="hidden">
+							</label>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-12">
+								<input type="text" class="form-control" id="invoice_amount" name="invoice_amount">
+							</div>
+						</div> -->
+
+						<div class="form-group">
+							<label for="invoice_amount" class="col-sm-1 control-label">
+								发票金额 
+							</label>
+							<div class="col-sm-3">
+								<input type="text" class="form-control" id="invoice_amount" name="invoice_amount" placeholder="默认不含税">
+							</div>
+							<div class="col-sm-1">
+								<a href="{:U('Invoice/select_taxi_reimburse')}" id="select_taxi_reimburse" class="btn btn-link">交通费用单</a>
+								<input name='reimburse_id' type="hidden">
+							</div>
+							
+							<label for="invoice_author" class="col-sm-1 control-label">开票人</label>
+							<div class="col-sm-4">
+								<input type="text" class="form-control" id="invoice_author" name="invoice_author">
+							</div>
+						</div>
+						
+						<input type="button" value="提 交" class="add_invoice btn btn-primary btn-block">
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</block>
+<block name="script">
+<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+<script type="text/javascript">
+$(function(){
+    $("#release_date").bind("keyup", function(event){
+    	if(event.keyCode != 8){
+    		var val = $(this).val();
+
+    		if(val.length == 4){
+    			$(this).val(val + "-");
+    		}
+
+    		if(val.length == 7){
+    			$(this).val(val + "-");
+    		}
+    	}
+    })
+
+    $("#invoice_qrcode").bind('keyup', function(){
+    	if(event.keyCode == 13){
+    		 $("input[name='qrcode_btn']").click()
+    		 $(this).val("")
+    	}
+    })
+
+    $("input[name='qrcode_btn']").bind("click", function(){
+    	var invoice = $("#invoice_qrcode").val().split(",");
+
+    	var release_date = invoice[5].substring(0,4) + "-" + invoice[5].substring(4,6) + "-" + invoice[5].substring(6,8);
+
+    	$("#invoice_code").val(invoice[2]);
+    	$("#invoice_num").val(invoice[3]);
+    	$("#invoice_amount").val(invoice[4]);
+    	$("#release_date").val(release_date);
+    	$("#verify_code").val(invoice[6]);
+    	$("#no_tax_amount").val(invoice[4]);
+		const invoiceType = getInvoiceType(invoice[2])
+		$("#invoice_type_name").val(invoiceType.fplxName);
+		$("#invoice_type_code").val(invoiceType.fplx);
+    })
+
+    $(".add_invoice").bind("click", function(){
+    	var load = layer.load(2);
+    	$.ajax({
+    		url: window.location.href,
+    		type: "POST",
+    		dataType: "json",
+    		data: $("#form1").serialize(),
+    		success: function(res){
+    			layer.close(load);
+
+				if(res.errNo == "0"){
+					window.localStorage.setItem('add_cat_id', $("#category_id").val())
+					window.location.href = window.location.href;
+				}else{
+					layer.alert(res.errMsg);
+				}
+    		}
+    	})
+    })
+
+    $("input[name='mobile_scan']").bind("click", function(){
+    	layer.open({
+		  type: 2,
+		  title: '手机识别',
+		  shade: [0],
+		  shadeClose: 1,
+		  area: ['340px', '75%'],
+		  offset: 'rb', //右下角弹出
+		  anim: 2,
+		  content: ['{:U("Invoice/mobileScanPage")}'], //iframe的url，no代表不显示滚动条
+		});
+    })
+
+    $("input[name='wechat_scan']").bind("click", function(){
+    	layer.open({
+		  type: 2,
+		  title: '微信识别',
+		  shade: false,
+		  area: ['340px', '75%'],
+		  offset: 'rb', //右下角弹出
+		  anim: 2,
+		  content: ['{:U("Invoice/wechatScanPage")}'], //iframe的url，no代表不显示滚动条
+		});
+    })
+
+    $("#select_taxi_reimburse").bind("click", function(){
+    	var url_addr = $(this).attr('href');
+
+    	var reimburse_id = $("input[name='reimburse_id']").val();
+
+    	reimburse_id = parseInt(reimburse_id);
+
+    	if(reimburse_id > 0){
+    		url_addr += "&reimburse_id=" + reimburse_id
+    	}
+    	layer.open({
+		  type: 2,
+		  title: '交通费用单',
+		  shade: 0.8,
+		  shadeClose: true,
+		  area: ['60%', '75%'],
+		  content: [url_addr], //iframe的url，no代表不显示滚动条
+		});
+
+		return false;
+    })
+
+
+    $("input[name='invoice_review']").bind("click", function(){
+    	var data = {
+    		'invoice_code': $("input[name='invoice_code']").val(),
+			'invoice_num': $("input[name='invoice_num']").val(),
+			'release_date': $("input[name='release_date']").val(),
+			'verify_code': $("input[name='verify_code']").val(),
+			'no_tax_amount': $("input[name='no_tax_amount']").val()
+    	}
+
+    	var load = layer.load(2);
+    	$.ajax({
+    		url: "{:U('Invoice/temp_invoice_review')}",
+    		type: "POST",
+    		dataType: "json",
+    		data: data,
+    		success: function(res){
+    			layer.close(load);
+
+				if(res.errNo == "0"){
+					layer.open({
+					  type: 2,
+					  title: '发票信息',
+					  shade: [0.8],
+					  area: ['60%', '80%'],
+					  shadeClose: true,
+					  content: [res.data], //iframe的url，no代表不显示滚动条
+					});
+
+					return false;;
+				}else{
+					layer.alert(res.errMsg);
+				}
+    		}
+    	})
+		return false;
+    })
+
+    var cat_id = window.localStorage.getItem('add_cat_id')
+
+    if(cat_id != null){
+    	$("#category_id").val(cat_id)
+    }
+	editInvoiceType()
+})
+
+function editInvoiceType() {
+	const invoice_type_obj = getInvoiceType($('#invoice_code').val())
+	$('#invoice_type_name').val(invoice_type_obj.fplxName)
+	$('#invoice_type_code').val(invoice_type_obj.fplx)
+}
+
+function getInvoiceType(fpdm) {
+  if (fpdm.length === 12) {
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '11') {
+      return {
+        fplx: '10',
+        fplxName: '增值税电子普通发票',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '12') {
+      return {
+        fplx: '14',
+        fplxName: '增值税电子普通发票(通行费)',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && (fpdm.substring(10, 12) === '04' || fpdm.substring(10, 12) === '05')) {
+      return {
+        fplx: '04',
+        fplxName: '增值税普通发票',
+      };
+    }
+    if (fpdm.charAt(0) === '0' && (fpdm.substring(10, 12) === '06' || fpdm.substring(10, 12) === '07')) {
+      return {
+        fplx: '11',
+        fplxName: '增值税普通发票(卷票)',
+      };
+    }
+
+
+    if (fpdm.charAt(0) === '0' && fpdm.substring(10, 12) === '17') {
+      return {
+        fplx: '15',
+        fplxName: '二手车销售统一发票',
+      };
+    }
+
+    if (fpdm.charAt(0) !== '0' && fpdm.substring(7, 8) === '2') {
+      return {
+        fplx: '03',
+        fplxName: '机动车销售统一发票',
+      };
+    }
+  }
+  if (fpdm.length === 10) {
+    const b = fpdm.substring(7, 8);
+    if (b === '1' || b === '5') {
+      return {
+        fplx: '01',
+        fplxName: '增值税专用发票',
+      };
+    }
+    if (b === '6' || b === '3') {
+      return {
+        fplx: '04',
+        fplxName: '增值税普通发票',
+      };
+    }
+    if (b === '7' || b === '2') {
+      return {
+        fplx: '02',
+        fplxName: '货物运输业增值税专用发票',
+      };
+    }
+  }
+  return {
+        fplx: '',
+        fplxName: '',
+      };
+}
+</script>
+</block>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{$meta_title}|OneThink管理平台</title>
+    <link href="__ROOT__/Public/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" type="text/css" href="__CSS__/base.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/common.css" media="all">
+    <link rel="stylesheet" type="text/css" href="__CSS__/module.css">
+    <link rel="stylesheet" type="text/css" href="__CSS__/style.css" media="all">
+  <link rel="stylesheet" type="text/css" href="__CSS__/{$Think.config.COLOR_STYLE}.css" media="all">
+
+    
+     <!--[if lt IE 9]>
+    <script type="text/javascript" src="__STATIC__/jquery-1.10.2.min.js"></script>
+    <![endif]--><!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="__STATIC__/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="__JS__/jquery.mousewheel.js"></script>
+    <style type="text/css">
+    body{
+        padding: 20px;
+    }
+    .search-form .search-input{
+        float: none;
+        margin-left: 10px;
+    }
+    .sleft *{
+        font-size: 16px;
+    }
+
+    .cf{
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 4px #ccc solid;
+    }
+
+    .search-form .form-control{
+        display: inline-block;
+        width: 12%;
+    }
+
+    #search,#reset{
+        margin-left: 10px;
+    }
+    </style>
+</head>
+<body>
+<form id='form1'>
+    <div class="search-form">
+        <label>发票分类&nbsp;</label>
+        <select name="category_id" class="form-control">
+            <option value="">全部分类</option>
+            <option value="0">默认</option>
+            <volist name='category_list' id='r'>
+                <option value="{$r['id']}">{$r['category_name']}</option>
+            </volist>
+        </select>
+        <label style="margin-left: 10px;">开票日期&nbsp;</label>
+        <input type="text" class="form-control" id="time-start" name="time-start" class="text input-2x" value="{:I('time-start')}" placeholder="起始时间" /> -                		
+        <input type="text" class="form-control" id="time-end" name="time-end" class="text input-2x" value="{:I('time-end')}" placeholder="结束时间" />
+        <select name="search_type" class="form-control" style="margin-left: 15px; margin-right: 10px;">
+            <option value="">搜索类型</option>
+            <option value="1">发票代码</option>
+            <option value="2">发票号码</option>
+            <option value="3">开票人</option>
+        </select>
+        <input type="text" name="title" class="form-control" value="{:I('title')}" placeholder="请输入搜索内容">
+        <a class="btn btn-primary" href="javascript:;" id="search" url="{:U('taxi_reimburse/select_invoice')}">搜索</a>
+        <a class="btn btn-default" href="{:U('taxi_reimburse/select_invoice')}" id="reset">重置</a>
+    </div>
+</form>
+<form id="form1">
+    <!-- 数据表格 -->
+    <div class="" style="margin-top: 20px;">
+        <table class="table">
+            <thead>
+                <tr>
+                <th class="">商品名称</th>
+                <th class="">开票日期</th>
+                <th class="">发票代码</th>
+                <th class="">发票号码</th>
+                <th class="">金额(元)</th>
+                <th class="">选择</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="success">
+                    <td colspan="6" style="font-weight: bold;">已选列表&nbsp;</td>
+                </tr>
+                <volist name="select_list" id="vo">
+                <tr>
+                    <td>{$vo.product_name} </td>
+                    <td>{$vo.release_date}</td>
+                    <td>{$vo.invoice_code}</td>
+                    <td>{$vo.invoice_num}</td>
+                    <td><a class="reload_amount" style="color: #5cb85c;">{$vo.invoice_show_amount}</a></td>
+                    <td>
+                        <div class="switch">
+                            <input class="check_invoice" id="check_invoice_{$vo.id}" name="invoice_info" type="radio" data-invoice_id='{$vo.id}' data-invoice_amount='{$vo.invoice_amount}'/>
+                        </div>
+                    </td>
+                </tr>
+                </volist>
+                <tr class="info">
+                    <td colspan="6" style="font-weight: bold;">未选列表&nbsp;</td>
+                </tr>
+                <volist name="list" id="vo">
+                <tr>
+                    <td>{$vo.product_name} </td>
+                    <td>{$vo.release_date}</td>
+                    <td>{$vo.invoice_code}</td>
+                    <td>{$vo.invoice_num}</td>
+                    <td><a class="reload_amount" style="color: #5cb85c;">{$vo.invoice_show_amount}</a></td>
+                    <td>
+                        <if condition="($vo.bind_status eq 'OTHER')">  -
+                        <else /> 
+                        <div class="switch">
+                            <input class="check_invoice" id="check_invoice_{$vo.id}" name="invoice_info" type="radio" data-invoice_id='{$vo.id}' data-invoice_amount='{$vo.invoice_amount}' />
+                        </div>
+
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table> 
+    </div>
+
+    <!-- 分页 -->
+    <div class="page1">
+        {$_page}
+    </div>
+</form>
+  <link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+  
+  <link rel="stylesheet" type="text/css" href="/Public/switch/css/bootstrap2/bootstrap-switch.css" media="all">
+  <script type="text/javascript" src="/Public/switch/js/bootstrap-switch.js"></script>
+  <script type="text/javascript">
+  $(function(){
+    //搜索功能
+	$("#search").click(function(){
+		var url = $(this).attr('url');
+        var query  = $('#form1').serialize();
+        query = query.replace(/(&|^)(\w*?\d*?\-*?_*?)*?=?((?=&)|(?=$))/g,'');
+        query = query.replace(/^&/g,'');
+
+        if( url.indexOf('?')>0 ){
+            url += '&' + query;
+        }else{
+            url += '?' + query;
+        }
+		window.location.href = url;
+	});
+
+    $('.check_invoice').bootstrapSwitch({
+        'onText':'选择',
+        'offText': '取消'
+    });
+
+    function init_select_data() {
+      $("#check_invoice_{:I('invoice_id')}").bootstrapSwitch('state', true)
+    };
+
+    init_select_data();
+
+    $('.check_invoice').bootstrapSwitch("onSwitchChange",function(event,state){
+        var load = layer.load(2);
+        var select_type = "{:I('type')}";
+        var row_index = "{:I('row_index')}";
+
+        var invoice_id = $(this).data('invoice_id');
+        const data = {
+          'taxi_id': "{:I('id')}",
+          'invoice_id': invoice_id
+        }
+
+        var url;
+        if (state === true) {
+          url = "{:U('TaxiReimburse/addInvoiceBind')}"
+        } else {
+          url = "{:U('TaxiReimburse/removeInvoiceBindeInfo')}"
+        }
+
+        $.post(url, data, function(res) {
+          layer.close(load);
+          if(res.errNo == "0"){
+            parent.location.href = parent.location.href;
+            console.log('success')
+          }else{
+            layer.alert(res.errMsg);
+          }
+        })
+    })
+    $("select[name='category_id']").val("{:I('category_id')}");
+    $("select[name='search_type']").val("{:I('search_type')}");
+  })
+  </script>
+</body>
+</html>

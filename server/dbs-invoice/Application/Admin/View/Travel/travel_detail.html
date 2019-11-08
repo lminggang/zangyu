@@ -1,0 +1,313 @@
+<extend name="Public/base"/>
+
+<!-- 子导航 -->
+<block name="sidebar">
+    <include file="sidemenu" />
+</block>
+
+
+<block name="body">
+<style type="text/css">
+  .cheque_title{
+    text-align: center;
+    font-size: 2rem;
+  }
+  .travel_detail{
+    margin-top: -21px;
+  }
+  .travel_detail > tbody > tr > td{
+    vertical-align: middle !important;
+    text-align: center;
+  }
+  .travel_detail  > td{
+    
+  }
+</style>
+<form id="form1">
+<table class="table table-bordered">
+    <tr>
+        <th class="cheque_title" colspan="3">
+            差旅费用报销单
+        </th>
+    </tr>
+    <tr>
+        <td>
+            <label><span style='color:red;'>*&nbsp;</span>员工姓名: &nbsp;</label>
+            {$info.staff_name}
+        </td>
+        <td>
+            <label>所属部门: &nbsp;</label>
+            {$info.staff_department}
+        </td>
+        <td>
+            <label>出行地点: &nbsp;</label>
+            {$info.target_address}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label><span style='color:red;'>*&nbsp;</span>项目名称: &nbsp;</label>
+            {$info.project_name}
+        </td>
+        <td>
+            <label>项目编号: &nbsp;</label>
+            {$info.project_code}
+        </td>
+        <td>
+            <label>出行目的: &nbsp;</label>
+            {$info.target_desc}
+        </td>
+    </tr>
+</table>
+<table class="table table-bordered travel_detail">
+    <tr>
+        <td rowspan="2" valign="middle">日期</td>
+        <td rowspan="2" valign="middle">出发地点</td>
+        <td rowspan="2" valign="middle">到达地点</td>
+        <td rowspan="2" valign="middle">事由</td>
+        <td rowspan="2" valign="middle">单据数量</td>
+        <td colspan="6" style="text-align: center;">费用金额（元）</td>
+    </tr>
+    <tr class="head_title">
+        <td>本地<br>交通费</td>
+        <td>异地<br>交通费</td>
+        <td>机票<br>火车票</td>
+        <td>餐费</td>
+        <td>住宿费</td>
+        <td>合计</td>
+    </tr>
+    <tbody id="detail">
+    <volist id="item" name='detail'>
+    <tr>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="detail_date[]" id="detail_date[]" value="{$item.detail_date}" />
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="start_address[]" id="start_address[]" value="{$item.start_address}"/>
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="finish_address[]" id="finish_address[]" value="{$item.finish_address}"/>
+        </td>
+        <td>
+            <input autocomplete="off" type="input" class="form-control" name="detail_desc[]" id="detail_desc[]" value="{$item.detail_desc}"/>
+        </td>
+        <td style="width: 50px;">
+            <span class="ticket_cnt">{$item.ticket_cnt}</span>
+            <input type="hidden" name="ticket_cnt[]" value="{$item.ticket_cnt}">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=local_taxi_expense&detail_id={$item.id}" class="select_invoice local_taxi_expense">{$item.local_taxi_expense}</a>
+            <input type="hidden" name="local_taxi_expense[]" value='{$item.local_taxi_expense_json}'>
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=remote_taxi_expense&detail_id={$item.id}" class="select_invoice remote_taxi_expense">{$item.remote_taxi_expense}</a>
+            <input type="hidden" name="remote_taxi_expense[]" value='{$item.remote_taxi_expense_json}'>
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=air_expense" class="select_invoice air_expense">{$item.air_expense}</a>
+            <input type="hidden" name="air_expense[]" value='{$item.air_expense_json}'>
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=meals_expense&detail_id={$item.id}" class="select_invoice meals_expense">{$item.meals_expense}</a>
+            <input type="hidden" name="meals_expense[]" value='{$item.meals_expense_json}'>
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=hotel_expense&detail_id={$item.id}" class="select_invoice hotel_expense">{$item.hotel_expense}</a>
+            <input type="hidden" name="hotel_expense[]" value='{$item.hotel_expense_json}'>
+        </td>
+        <td>
+            <span class="total_expense">{$item.total_expense_show}</span>
+            <input type="hidden" name="total_expense[]" value="{$item.total_expense}">
+        </td>
+    </tr>
+    </volist>
+    <for start="0" end="$row_cnt">
+    <tr>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="detail_date[]" id="detail_date[]" />
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="start_address[]" id="start_address[]" />
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="finish_address[]" id="finish_address[]" />
+        </td>
+        <td>
+            <input autocomplete="off" type="input" class="form-control" name="detail_desc[]" id="detail_desc[]" />
+        </td>
+        <td style="width: 50px;">
+            <span class="ticket_cnt">0</span>
+            <input type="hidden" name="ticket_cnt[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=local_taxi_expense" class="select_invoice local_taxi_expense">0.00</a>
+            <input type="hidden" name="local_taxi_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=remote_taxi_expense" class="select_invoice remote_taxi_expense">0.00</a>
+            <input type="hidden" name="remote_taxi_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=air_expense" class="select_invoice air_expense">0.00</a>
+            <input type="hidden" name="air_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=meals_expense" class="select_invoice meals_expense">0.00</a>
+            <input type="hidden" name="meals_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=hotel_expense" class="select_invoice hotel_expense">0.00</a>
+            <input type="hidden" name="hotel_expense[]">
+        </td>
+        <td>
+            <span class="total_expense">0.00</span>
+            <input type="hidden" name="total_expense[]">
+        </td>
+    </tr>
+    </for>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="11">
+                <input type="button" name="add_item" value="+" class="btn btn-success btn-block">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="10">
+                合计: <span class="total_amount_zh">{$info.total_amount_zh}</span>
+            </td>
+            <td align="center">
+                <span class="total_amount_num">{$info.total_amount_show}</span>
+                <input type="hidden" name="total_amount" value="{$info.total_amount}">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="11" align="center">
+                <input type="button" name="create_travel_detail" value="提&emsp;交" class="btn btn-info">&emsp;&emsp;
+                <input type="button" name="reset_travel_detail" value="重&emsp;置" class="btn btn-default">
+            </td>
+        </tr>
+    </tfoot>
+</table>
+</form>
+
+<input class="item_template" type="hidden" value='
+    <tr>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="detail_date[]" id="detail_date[]" />
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="start_address[]" id="start_address[]" />
+        </td>
+        <td style="width: 120px;">
+            <input autocomplete="off" type="input" class="form-control" name="finish_address[]" id="finish_address[]" />
+        </td>
+        <td>
+            <input autocomplete="off" type="input" class="form-control" name="detail_desc[]" id="detail_desc[]" />
+        </td>
+        <td style="width: 50px;">
+            <span class="ticket_cnt">0</span>
+            <input type="hidden" name="ticket_cnt[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=local_taxi_expense" class="select_invoice local_taxi_expense">0.00</a>
+            <input type="hidden" name="local_taxi_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=remote_taxi_expense" class="select_invoice remote_taxi_expense">0.00</a>
+            <input type="hidden" name="remote_taxi_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=air_expense" class="select_invoice air_expense">0.00</a>
+            <input type="hidden" name="air_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=meals_expense" class="select_invoice meals_expense">0.00</a>
+            <input type="hidden" name="meals_expense[]">
+        </td>
+        <td>
+            <a href="{:U('Travel/select_invoice')}&type=hotel_expense" class="select_invoice hotel_expense">0.00</a>
+            <input type="hidden" name="hotel_expense[]">
+        </td>
+        <td>
+            <span class="total_expense">0.00</span>
+            <input type="hidden" name="total_expense[]">
+        </td>
+    </tr>'> 
+</div>
+</form>
+</block>
+<block name="script">
+<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+
+<link href="__STATIC__/datetimepicker/css/datetimepicker.css" rel="stylesheet" type="text/css">
+<php>if(C('COLOR_STYLE')=='blue_color') echo '<link href="__STATIC__/datetimepicker/css/datetimepicker_blue.css" rel="stylesheet" type="text/css">';</php>
+<link href="__STATIC__/datetimepicker/css/dropdown.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script type="text/javascript">
+    $(function(){
+        $(document).on("focus", "input[name='detail_date\[\]']", function () {
+            $(this).datetimepicker({ format: "yyyy-mm-dd", language:"zh-CN", minView:2, autoclose:true});
+        });
+
+        $("input[name='add_item']").bind('click', function(){
+
+            $('.travel_detail #detail').append($(".item_template").val())
+        })
+
+        $("input[name='reset_travel_detail']").bind('click', function(){
+            window.location.href = window.location.href;
+        })
+
+        $("input[name='create_travel_detail']").bind('click', function(){
+            // var load = layer.load(2);
+            $.ajax({
+                url: window.location.href,
+                type: "POST",
+                dataType: "json",
+                data: $("#form1").serialize(),
+                success: function(res){
+                    // layer.close(load);
+
+                    if(res.errNo == "0"){
+                        parent.location.href = "{:U("Travel/travel_detail")}&id=" + res.data;
+                    }else{
+                        layer.alert(res.errMsg);
+                    }
+                }
+            })
+        })
+
+        $(document).on('click', '.select_invoice', function(){
+            var url_addr = $(this).attr('href');
+
+            var index = $(this).parent().parent().index();
+
+            var hidden_data = $(this).next().val();
+
+            var invoice_id = [];
+            if(hidden_data != ''){
+                var data = JSON.parse(hidden_data);
+
+                for(k in data){
+                    invoice_id.push(k);
+                }
+            }
+
+            invoice_id = invoice_id.join('|');
+            url_addr += "&row_index=" + index + "&invoice_id=" + invoice_id;
+            layer.open({
+                type: 2,
+                title: '选择发票记录',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['60%', '80%'],
+                content: url_addr
+            });
+            return false;
+        })
+    })
+</script>
+</block>

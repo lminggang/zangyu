@@ -1,0 +1,387 @@
+<extend name="Public/base"/>
+
+<!-- 子导航 -->
+<block name="sidebar">
+    <include file="sidemenu" />
+</block>
+
+
+<block name="body">
+<style type="text/css">
+  .cheque_title{
+    text-align: center;
+    font-size: 2rem;
+  }
+  .travel_detail{
+    margin-top: -21px;
+  }
+  .travel_detail > tbody > tr > td{
+    vertical-align: middle !important;
+    text-align: center;
+  }
+  .travel_detail  > td{
+     
+  }
+</style>
+<form id="form1">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th class="taxi_title" colspan="7">交通费用报销单</th>
+      </tr>
+      <tr>
+        <th colspan="2">员工姓名: {$info['staff_name']}</th>
+        <th colspan="2">员工编号: {$info['staff_no']}</th>
+        <th colspan="3">员工部门: {$info['staff_department']}</th>
+      </tr>
+      <tr>
+        <th colspan="2">
+          行程开始时间: 
+          <span id="start_date" name="start_date">{$info['travel_start_date']}</span>
+          <input type="hidden" name="start_date" value="{$info['travel_start_date']}">
+        </th>
+        <th colspan="2">
+          行程结束时间: 
+          <span id="end_date" name="end_date">{$info['travel_end_date']}</span>
+          <input type="hidden" name="end_date" value="{$info['travel_end_date']}">
+        </th>
+        <th colspan="2">
+          合计金额: 
+          <span id="total_amount" name="total_amount">{$info['total_amount']}</span>
+          <input type="hidden" name="total_amount" value="{$info['total_amount']}">
+        </th>
+        <th colspan="1" style="padding:0">
+          <button type="button" style="border-radius: 0;border:0;width:100%;height:36px" class="btn btn-primary" onclick="importDetail()">导入明细</button>
+        </th>
+      </tr>
+      <tr>
+        <th>日期</th>
+        <th>出发地点</th>
+        <th>到达地点</th>
+        <th>事由</th>
+        <th>金额</th>
+        <th>备注</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <volist name="list" id="vo">
+        <tr class="row_detail">
+          <td style="padding:0">
+            <input type="hidden" value="{$vo.id}" name="id[]">
+            <input class="td_input input_date" type="text" onchange="update_start_end_date()" value="{$vo.detail_date}" name="detail_date[]" autocomplete="off">
+          </td>
+          <td style="padding:0"><input class="td_input" type="text" value="{$vo.detail_departure_location}" name="detail_departure_location[]" autocomplete="off"></td>
+          <td style="padding:0"><input class="td_input" type="text" value="{$vo.detail_arrival_location}" name="detail_arrival_location[]" autocomplete="off"></td>
+          <td style="padding:0"><input class="td_input" type="text" value="{$vo.detail_cause}" name="detail_cause[]" autocomplete="off"></td>
+          <td style="padding:0">
+            <input class="td_input input_amount" onchange="update_total_amount()" type="text" value="{$vo.detail_amount}" name="detail_amount[]" autocomplete="off">
+          </td>
+          <td style="padding:0"><input class="td_input" type="text" value="{$vo.detail_remark}" name="detail_remark[]" autocomplete="off"></td>
+          <td style="padding:0">
+            <!-- <input class="btn btn-danger" style="border-radius: 0; width:100%;height:36px;" onclick="removeValue(this)" type="button" value="删除"> -->
+            <button class="btn btn-danger" style="border-radius: 0; width:100%;height:36px;" onclick="removeValue(this)" >删除</button>
+          </td>
+        </tr>
+      </volist>
+
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="7" style="padding:0">
+          <button type="button" style="border-radius: 0;border:0;width:100%;" class="btn btn-success" onclick="addDetail()">新增明细</button>
+        </td>
+      </td>
+    </tfoot>
+  </table>
+</form>
+
+
+<div id="detail_div" hidden style="padding:10px">
+  <textarea class="form-control" id="detail_content" rows="8" style="margin-bottom: 15px"></textarea>
+  <button type="button" style="float: right;" class="btn btn-success" onclick="importContent()">确 定</button>
+</div>
+
+
+<div style="width: 100%;">
+  <input type="button" name="create_taxi_detail" value="提&emsp;交" class="btn btn-info">&emsp;&emsp;
+  <input type="button" name="reset_taxi_detail" value="重&emsp;置" class="btn btn-default">
+</div>
+
+</block>
+<block name="script">
+<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+
+<link href="__STATIC__/datetimepicker/css/datetimepicker.css" rel="stylesheet" type="text/css">
+<php>if(C('COLOR_STYLE')=='blue_color') echo '<link href="__STATIC__/datetimepicker/css/datetimepicker_blue.css" rel="stylesheet" type="text/css">';</php>
+<link href="__STATIC__/datetimepicker/css/dropdown.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="__STATIC__/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script type="text/javascript">
+  var layer_open;
+  $(function(){
+    $("input[name='reset_taxi_detail']").bind('click', function() {
+      // $('.row_detail').remove()
+      // $('#total_amount').text(0)     
+      window.location=location.href
+    })
+
+    $("input[name='create_taxi_detail']").bind('click', function() {
+      check_last_row_empty()
+      if (!submit_check_value()){
+        return
+      }
+      var load = layer.load(2);
+      $.post(window.location.href, $("#form1").serialize(), function(res) {
+        layer.close(load);
+        if(res.errNo == "0"){
+          console.log(document.referrer)
+          window.location=document.referrer;
+        }else{
+          layer.alert(res.errMsg);
+        }
+      })
+    })
+
+    for (var i = 0; i < 5; i++) {
+      addDetail()
+    }
+
+    $(document).on("focus", 'input[name="detail_date[]"]', function () {
+      $(this).datetimepicker({ format: "yyyy-mm-dd", language:"zh-CN", minView:2, autoclose:true});
+      // setTimeout(() => {
+      //   check_max_min_date()
+      // }, 2000);
+    });
+  })
+
+  function addDetail(taxi_date='', start_location='', end_location='', cause='', amount='', remark='') {
+    detail_html = 
+    '<tr class="row_detail">' +
+      '<td style="padding:0">' +
+        '<input type="hidden" value="0" name="id[]">' +
+        '<input class="td_input input_date" type="text" onchange="update_start_end_date()" value="' + taxi_date +'" name="detail_date[]" autocomplete="off">' +
+      '</td>' +
+      '<td style="padding:0"><input class="td_input" type="text" value="' + start_location +'" name="detail_departure_location[]" autocomplete="off"></td>' +
+      '<td style="padding:0"><input class="td_input" type="text" value="' + end_location +'" name="detail_arrival_location[]" autocomplete="off"></td>' +
+      '<td style="padding:0"><input class="td_input" type="text" value="' + cause +'" name="detail_cause[]" autocomplete="off"></td>' +
+      '<td style="padding:0">' +
+        '<input class="td_input input_amount" onchange="update_total_amount()" type="text" value="' + amount +'" name="detail_amount[]" autocomplete="off">' +
+      '</td>' +
+      '<td style="padding:0"><input class="td_input" type="text" value="' + remark +'" name="detail_remark[]" autocomplete="off"></td>' +
+      '<td style="padding:0"><button class="btn btn-danger" style="border-radius: 0; width:100%;height:36px;" onclick="removeValue(this)" >删除</button></td>'
+    '</tr>'
+
+    $("tbody").append(detail_html)
+  }
+
+  function update_total_amount() {
+    var total_amount = 0
+    $('.input_amount').each(function() {
+      total_amount += Number($(this).val())
+    })
+    $("#total_amount").text(total_amount.toFixed(2))
+    $("input[name='total_amount']").val(total_amount.toFixed(2))
+
+  }
+
+  function update_start_end_date() {
+    check_max_min_date()
+  }
+
+  function importDetail() {
+    $("#detail_content").val('')
+    layer_open = layer.open({
+      type: 1,
+      resize: true,
+      area: ['500px', '290px'],
+      title: '导入明细',
+      content: $('#detail_div')
+    });
+    check_last_row_empty()
+  }
+
+  function check_last_row_empty() {
+    $('.row_detail').each(function() {
+      var content = ''
+      $($(this).children('td')).children('input').each(function () {
+        content += $(this).val()
+      })
+
+      if (!content || content == 0) {
+        $(this).remove()
+      }
+    })
+  }
+
+  function submit_check_value() {
+    var check_res = true
+    var content_list = []
+    var content_repeat_alert = '';
+    $('.row_detail').each(function() {
+      var content = ''
+      $($(this).children('td')).children('input').each(function () {
+        if (($(this).attr('name') == "detail_remark[]") || $(this).attr('name') == "detail_cause[]") {
+          $(this).css('background-color','white')
+        }
+
+        if ($(this).attr('name') == "detail_date[]") {
+          content += $(this).val()
+          if ($(this).val() == '') {
+            $(this).css('background-color','#F56C6C')
+            check_res = false
+          } else {
+            $(this).css('background-color','white')
+          }
+        }
+
+        if ($(this).attr('name') == "detail_departure_location[]") {
+          content += $(this).val()
+          if ($(this).val() == '') {
+            $(this).css('background-color','#F56C6C')
+            check_res = false
+          } else {
+            $(this).css('background-color','white')
+          }
+        }
+
+        if ($(this).attr('name') == "detail_arrival_location[]") {
+          content += $(this).val()
+          if ($(this).val() == '') {
+            $(this).css('background-color','#F56C6C')
+            check_res = false
+          } else {
+            $(this).css('background-color','white')
+          }
+        }
+
+        if ($(this).attr('name') == "detail_amount[]") {
+          content += $(this).val()
+          if (Number($(this).val()) == 0) {
+            $(this).css('background-color','#F56C6C')
+            check_res = false
+          } else {
+            $(this).css('background-color','white')
+          }
+        }
+
+      })
+
+
+      find_repeat = $.inArray(content, content_list)
+      if (content != '' && find_repeat != -1) {
+        var start = Number(find_repeat) + 1
+        var end = Number(content_list.length) + 1
+        if (content_repeat_alert == '') {
+          content_repeat_alert = '数据重复请检查数据行: <br>';
+        }
+        content_repeat_alert += start + ', ' + end + '<br>'
+        $(this).children().children('input').css('background-color','#E6A23C')
+        check_res = false
+      }
+
+      content_list.push(content)
+      if (!content) {
+        $(this).remove()
+      }
+    })
+
+    if (content_repeat_alert != '') {
+      content_repeat_alert = content_repeat_alert.substring(0, content_repeat_alert.length - 4)
+      layer.alert(content_repeat_alert, {area:['15%','35%']});
+    }
+    return check_res;
+  }
+
+  function importContent() {
+    const detail_content = $('#detail_content').val()
+    const detail_list = detail_content.split('\n')
+
+    for (var i = 0 ;i < detail_list.length; i++) {
+      const info_list = detail_list[i].split(' ')
+      
+      if (info_list.length < 10){
+        console.log('数据出现问题')
+        continue;
+      }
+      var MyDate = new Date();
+
+      const taxi_date = MyDate.getFullYear() + '-' + info_list[2]
+      const start_location = info_list[6]
+      const end_location = info_list[7]
+      const amount = info_list[9]
+
+      addDetail(
+        taxi_date,
+        start_location,
+        end_location,
+        '',
+        amount,
+        '',
+      )
+    }
+    check_max_min_date()
+    update_total_amount()
+    layer.close(layer_open)   
+  }
+
+  function check_max_min_date() {
+    var total_amount = 0
+    var min_origin_date, max_origin_date;
+    var max_date, min_date;
+    $('.input_date').each(function() {
+      origin_date = $(this).val()
+      new_date = Number(origin_date.replace(/-/g, ''))
+      if (origin_date.length != 10) {
+        return
+      }
+      if (!max_origin_date) {
+        max_date = new_date;
+        max_origin_date = origin_date
+      } else {
+        if (new_date > max_date) {
+          max_date = new_date
+          max_origin_date = origin_date
+        }
+      }
+
+      if (!min_origin_date) {
+        min_date = new_date;
+        min_origin_date = origin_date
+      } else {
+        if (new_date < min_date) {
+          min_date = new_date
+          min_origin_date = origin_date
+        }
+      }
+    })
+    $("#start_date").text(min_origin_date)
+    $("#end_date").text(max_origin_date)
+    $("input[name='start_date']").val(min_origin_date)
+    $("input[name='end_date']").val(max_origin_date)
+
+  }
+
+  function removeValue(item) {
+    $(item).parent().parent().remove()
+  }
+</script>
+
+
+<style type="text/css">
+.taxi_title {
+  text-align: center;
+  font-size: 2rem;
+}
+.padding0{
+  padding:0;
+}
+.td_input{
+  height: 36px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+}
+</style>
+</block>

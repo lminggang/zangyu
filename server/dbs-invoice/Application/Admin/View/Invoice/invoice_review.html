@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>发票真实信息</title>
+	<meta charset="UTF-8">
+	<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+	<script type="text/javascript" src="__STATIC__/jquery-2.0.3.min.js"></script>
+	<style type="text/css">
+		.row_1{
+			margin-bottom: 0px;
+		}
+		.row_1 tbody tr td{
+			border-top: none;
+		}
+
+		.panel{
+			margin-bottom: 5px;
+			border: none;
+		}
+		.panel-default .panel-heading{
+			border: 0px;
+			background:none;
+			font-weight: bold;
+			font-size: 18px;
+		}
+		.goods_list{
+			margin-top: 10px;
+		}
+		.table_font {
+		font-family: 'PingFang-SC-Medium';
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="panel panel-info" id='invoice_content'>
+			<div class="panel-body">
+				<table class="table table-bordered table_font" style="margin-bottom: 0px;">
+					<tr>
+						<th colspan="8" style="text-align: center">发票明细单</th>
+					</tr>
+					<tr>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width: 0px;">购买方</div></th>
+						<td width="300">名&emsp;&emsp;称: <span id="gfMc">{$invoice['gfMc']}</span></td>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width: 0px;">发票信息</div></th>
+						<td width="300" style="vertical-align:inherit">发票代码: <span id="fpdm">{$invoice['fpdm']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">纳税人识别号: <span id="gfNsrsbh">{$invoice['gfNsrsbh']}</span></td>
+						<td width="300">发票号码: <span id="num">{$invoice['fphm']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">地址、电话: <span id="gfContact">{$invoice['gfContact']}</span></td>
+						<td width="300">开票日期: <span id="kprq">{$invoice['kprq']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">开户行及账号: <span id="gfBank">{$invoice['gfBank']}</span></td>
+						<td width="300">校&emsp;验&emsp;码: <span id="code">{$invoice['code']}</span></td>
+					</tr>
+				</table>
+				<table class="table table-bordered table_font" style="margin-bottom: 0px;">
+					<tr>
+						<th style="text-align: center;width:300px;">货物或应税劳务、服务名称</th>
+						<th style="text-align: center;width:100px;">规格型号</th>
+						<th style="text-align: center">单位</th>
+						<th style="text-align: center">数量</th>
+						<th style="text-align: center">单价</th>
+						<th style="text-align: center">金额</th>
+						<th style="text-align: center">税率</th>
+						<th style="text-align: center">税额</th>
+					</tr>
+					<tbody id="goods_tr">
+						<volist name="goods" id="good">
+							<tr>
+								<td style="text-align: center">{$good['goods_name']}</td>
+								<td style="text-align: center">{$good['goods_spec']}</td>
+								<td style="text-align: center">{$good['goods_unit']}</td>
+								<td style="text-align: center">{$good['goods_cnt']}</td>
+								<td style="text-align: center">{$good['goods_price']}</td>
+								<td style="text-align: center">{$good['goods_amount']}</td>
+								<td style="text-align: center">{$good['goods_tax_rate']}%</td>
+								<td style="text-align: center">{$good['goods_tax_amount']}</td>
+							</tr>
+						</volist>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="1" style="text-align: center;">合&emsp;&emsp;&emsp;计</th>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1" style="text-align: center"><span id="total_goods_amount">{$invoice['goodsamount']}</span></td>
+							<td colspan="1"></td>
+							<td colspan="1" style="text-align: center"><span id="total_tax_amount">{$invoice['taxamount']}</span></td>
+						</tr>
+						<tr>
+							<th colspan="1" style="text-align: center;">价税合计（大写）</th>
+							<td colspan="7"><span id="total_amount_zh">{$invoice['total_amount_zh']}</span> <div style="float:right;">（小写）¥ <span id="total_amount">{$invoice['sumamount']}</span></div></td>
+						</tr>
+					</tfoot>
+				</table>
+				<table class="table table-bordered table_font">
+					<tr>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width: 0px;">销售方</div></th>
+						<td width="300">名&emsp;&emsp;称: <span id="xfMc">{$invoice['xfMc']}</span></td>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width: 0px;">备注</div></th>
+						<td width="300" rowspan="4" style="vertical-align:inherit"><span id="remark">{$invoice['remark']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">纳税人识别号: <span id="xfNsrsbh">{$invoice['xfNsrsbh']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">地 址、电 话: <span id="xfContact">{$invoice['xfContact']}</span></td>
+					</tr>
+					<tr>
+						<td width="300">开户行及账号: <span id="xfBank">{$invoice['xfBank']}</span></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

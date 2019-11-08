@@ -1,0 +1,333 @@
+<extend name="Public/base"/>
+
+<!-- 子导航 -->
+<block name="sidebar">
+    <include file="sidemenu" />
+</block>
+
+
+<block name="body">
+	<div class="container">
+		<div class="panel panel-info" id='invoice_content'>
+			<div class="panel-heading">发票检索&emsp;
+				<input 
+					type="text" 
+					class="form-control input-sm"
+					id="invoice_qrcode" 
+					name="qrcode_btn"  
+					οnkeypress="if(event.keyCode==13) {submitAdd.click();return false;}"
+					style="width: 600px;display: inline-block;"
+				>
+				<span id="tips" style="color: #d9534f;"></span>
+			</div>
+			<div class="panel-body">
+				
+				<table class="table table-bordered table_font" style="margin-bottom: 0px;">
+					<tr>
+						<th colspan="8" style="text-align: center">发票明细单</th>
+					</tr>
+					<tr>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width:0px;">购买方</div></th>
+						<td width="300">名&emsp;&emsp;称: <span id="gfMc"></span></td>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width:0px;">发票信息</div></th>
+						<td width="300" style="vertical-align:inherit">发票代码: <span id="fpdm"></span></td>
+					</tr>
+					<tr>
+						<td width="300">纳税人识别号: <span id="gfNsrsbh"></span></td>
+						<td width="300">发票号码: <span id="fphm"></span></td>
+					</tr>
+					<tr>
+						<td width="300">地址、电话: <span id="gfContact"></span></td>
+						<td width="300">开票日期: <span id="kprq"></span></td>
+					</tr>
+					<tr>
+						<td width="300">开户行及账号: <span id="gfBank"></span></td>
+						<td width="300">校&emsp;验&emsp;码: <span id="code"></span></td>
+					</tr>
+				</table>
+				<table class="table table-bordered table_font" style="margin-bottom: 0px;">
+					<tr>
+						<th style="text-align: center;width:300px;">货物或应税劳务、服务名称</th>
+						<th style="text-align: center;width:100px;">规格型号</th>
+						<th style="text-align: center">单位</th>
+						<th style="text-align: center">数量</th>
+						<th style="text-align: center">单价</th>
+						<th style="text-align: center">金额</th>
+						<th style="text-align: center">税率</th>
+						<th style="text-align: center">税额</th>
+					</tr>
+					<tbody id="goods_tr">
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+						<tr>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+							<td>&emsp;</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="1" style="text-align: center;">合&emsp;&emsp;&emsp;计</th>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1"></td>
+							<td colspan="1"><span id="total_goods_amount">0.00</span></td>
+							<td colspan="1"></td>
+							<td colspan="1"><span id="total_tax_amount">0.00</span></td>
+						</tr>
+						<tr>
+							<th colspan="1" style="text-align: center;">价税合计（大写）</th>
+							<td colspan="7"><span id="total_amount_zh"></span> <div style="float:right;">（小写）¥ <span id="total_amount"></span></div></td>
+						</tr>
+					</tfoot>
+				</table>
+				<table class="table table-bordered table_font">
+					<tr>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width:0px;">销售方</div></th>
+						<td width="300">名&emsp;&emsp;称: <span id="xfMc"></span></td>
+						<th width="10" rowspan="4" style="vertical-align:inherit"><div style="width:0px;">备注</div></th>
+						<td width="300" rowspan="4" style="vertical-align:inherit"><span id="remark"></span></td>
+					</tr>
+					<tr>
+						<td width="300">纳税人识别号: <span id="xfNsrsbh"></span></td>
+					</tr>
+					<tr>
+						<td width="300">地 址、电 话: <span id="xfContact"></span></td>
+					</tr>
+					<tr>
+						<td width="300">开户行及账号: <span id="xfBank"></span></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+	</div>
+</block>
+<block name="script">
+<link href="/Public/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/Public/Admin/js/layer/layer.js"></script>
+<script type="text/javascript">
+$(function(){
+    $("#release_date").bind("keyup", function(event){
+    	if(event.keyCode != 8){
+    		var val = $(this).val();
+
+    		if(val.length == 4){
+    			$(this).val(val + "-");
+    		}
+
+    		if(val.length == 7){
+    			$(this).val(val + "-");
+    		}
+    	}
+    })
+	document.getElementById("invoice_qrcode").focus();
+
+	setInterval(() => {
+		document.getElementById("invoice_qrcode").focus();
+	}, 1000);
+
+    $("#invoice_qrcode").bind('keyup', function(){
+    	if(event.keyCode == 13){
+    		 $("input[name='qrcode_btn']").click()
+			 load_invoice()
+    		 $(this).val('')
+    	}
+    })
+})
+
+function load_invoice() {
+	if($("#invoice_qrcode").val().indexOf('，')>0){
+		$('#tips').text(' 请关闭输入法')
+	} else {
+		$('#tips').text('')
+	}
+	var input_content = $("#invoice_qrcode").val().replace(/，/g, ',')
+	var invoice = input_content.split(",");
+	const invoice_count = invoice.length
+	var release_date = ''
+	var invoice_code = invoice[0]
+	var invoice_num = invoice[1]
+	if (invoice_count < 6){
+		if (invoice_count == 2) {
+			invoice_code = invoice[0]
+			invoice_num = invoice[1]
+		} else {
+			layer.alert('二维码信息输入不正确, 请检车是否输入法是否开启<br>' + input_content);
+			return false
+		}
+	} else {
+		invoice_code = invoice[2]
+		invoice_num = invoice[3]
+	}
+
+	var load = layer.load(2);
+	$.ajax({
+		url: window.location.href,
+		type: "POST",
+		dataType: "json",
+		data: {'invoice_code': invoice_code, 'invoice_num': invoice_num},
+		success: function(res){
+			layer.close(load);
+			if(res.errNo == "0"){
+				const invoice_code = res.data.reviewInfo.invoice.code
+				// 销售方
+				$('#xfMc').text(res.data.reviewInfo.invoice.xfMc)
+				$('#xfContact').text(res.data.reviewInfo.invoice.xfContact)
+				$('#xfNsrsbh').text(res.data.reviewInfo.invoice.xfNsrsbh)
+				$('#xfBank').text(res.data.reviewInfo.invoice.xfBank)
+				// 购买方
+				$('#gfMc').text(res.data.reviewInfo.invoice.gfMc)
+				$('#gfContact').text(res.data.reviewInfo.invoice.gfContact)
+				$('#gfNsrsbh').text(res.data.reviewInfo.invoice.gfNsrsbh)
+				$('#gfBank').text(res.data.reviewInfo.invoice.gfBank)
+				// 发票信息
+				$('#code').text(invoice_code + ' [' + invoice_code.substring(invoice_code.length-6, invoice_code.length) + ']')
+				$('#fpdm').text(res.data.reviewInfo.invoice.fpdm)
+				$('#fphm').text(res.data.reviewInfo.invoice.fphm)
+				$('#kprq').text(res.data.reviewInfo.invoice.kprq)
+				// 备注
+				$('#remark').text(res.data.reviewInfo.invoice.remark)
+				// 金额部分
+				$('#total_amount').text(res.data.reviewInfo.invoice.sumamount)
+				$('#total_tax_amount').text(res.data.reviewInfo.invoice.taxamount)
+				$('#total_amount_zh').text(res.data.reviewInfo.invoice.total_amount_zh)
+				$('#total_goods_amount').text(res.data.reviewInfo.invoice.goodsamount)
+
+				
+
+				var total_amount = 0
+				var total_tax_amount = 0
+				$('#goods_tr').empty()
+				res.data.reviewInfo.goods.forEach(good => {
+					tr_html = 
+					'<tr>'+
+						'<td style="text-align: center"><span id="goods_name"></span>' + good['goods_name'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_spec"></span>' + good['goods_spec'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_unit"></span>' + good['goods_unit'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_cnt"></span>' + good['goods_cnt'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_price"></span>' + good['goods_price'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_amount"></span>' + good['goods_amount'] + '</td>'+
+						'<td style="text-align: center"><span id="goods_tax_rate"></span>' + good['goods_tax_rate'] + '%</td>'+
+						'<td style="text-align: center"><span id="goods_tax_amount"></span>' + good['goods_tax_amount'] + '</td>'+
+					'</tr>'
+					$('#goods_tr').append(tr_html)
+				});
+				const goods_count = res.data.reviewInfo.goods_count
+				const count = 5 - res.data.reviewInfo.goods_count
+				if (goods_count > 5) {
+					tr_html = 
+					'<tr>'+
+						'<td colspan="8" style="text-align: center">...</td>'+
+					'</tr>'
+					$('#goods_tr').append(tr_html)
+				} else {
+					default_count = 1
+					if (count > 0) {
+						default_count += count
+					}
+					for (i=0;i<default_count;i++){
+						tr_html = 
+						'<tr>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+							'<td style="text-align: center">&emsp;</td>'+
+						'</tr>'
+						$('#goods_tr').append(tr_html)
+					}
+				}
+				// 滑动到指定元素
+				// $("html,body").animate({scrollTop: $("#invoice_content").offset().top}, 1000);
+			}else{
+				layer.msg(res.errMsg, {time: 2500})
+			}
+		}
+	})
+}
+</script>
+<style type="text/css">
+	.row_1{
+		margin-bottom: 0px;
+	}
+	.row_1 tbody tr td{
+		border-top: none;
+	}
+
+	.panel{
+		margin-bottom: 5px;
+		border: none;
+	}
+	.panel-default .panel-heading{
+		border: 0px;
+		background:none;
+		font-weight: bold;
+		font-size: 18px;
+	}
+
+	.goods_list{
+		margin-top: 10px;
+	}
+	.table_font {
+		font-family: 'PingFang-SC-Medium';
+	}
+</style>
+</block>
